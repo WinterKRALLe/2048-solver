@@ -55,3 +55,15 @@ func placeRandomTile(board *Board) {
 		board[row][col] = value
 	}
 }
+
+func HasMaxTile(board Board) bool {
+	maxTile := 0
+	for _, row := range board {
+		for _, value := range row {
+			if value > maxTile {
+				maxTile = value
+			}
+		}
+	}
+	return maxTile >= 2048
+}

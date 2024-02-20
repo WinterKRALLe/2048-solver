@@ -7,18 +7,6 @@ import (
 	"math"
 )
 
-func HasMaxTile(board b.Board) bool {
-	maxTile := 0
-	for _, row := range board {
-		for _, value := range row {
-			if value > maxTile {
-				maxTile = value
-			}
-		}
-	}
-	return maxTile >= 2048
-}
-
 func evaluateWithAlphaBeta(node b.Board, depth int, alpha, beta int, maximizingPlayer bool) int {
 	if depth == 0 || b.IsGameOver(node) {
 		return evaluateBoard(node)
@@ -161,7 +149,7 @@ func playRound(board b.Board) string {
 		b.PrintBoard(board)
 	}
 
-	if HasMaxTile(board) {
+	if b.HasMaxTile(board) {
 		return "win"
 	}
 
