@@ -1,7 +1,5 @@
 package main
 
-import "math/rand"
-
 type Move int
 
 const (
@@ -171,30 +169,6 @@ func copyBoard(board Board) Board {
 		}
 	}
 	return newBoard
-}
-
-func placeRandomTile(board *Board) {
-	var emptyCells []int
-
-	for i, row := range board {
-		for j, value := range row {
-			if value == 0 {
-				emptyCells = append(emptyCells, i*Size+j)
-			}
-		}
-	}
-
-	if len(emptyCells) > 0 {
-		randomIndex := emptyCells[rand.Intn(len(emptyCells))]
-		row, col := randomIndex/Size, randomIndex%Size
-
-		value := 2
-		if rand.Intn(2) == 1 {
-			value = 4
-		}
-
-		board[row][col] = value
-	}
 }
 
 func isGameOver(board Board) bool {

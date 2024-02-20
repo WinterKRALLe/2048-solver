@@ -11,36 +11,24 @@ func hasMaxTile(board Board) bool {
 			}
 		}
 	}
-	return maxTile >= 2048
+	return maxTile >= 1024
 }
 
-type AlphaBetaPruner struct {
-	alpha, beta int
-}
-
-func (abp *AlphaBetaPruner) update(pruningValue int, maximizingPlayer bool) {
-	if maximizingPlayer && pruningValue > abp.alpha {
-		abp.alpha = pruningValue
-	} else if !maximizingPlayer && pruningValue < abp.beta {
-		abp.beta = pruningValue
-	}
-}
-
-func minimaxAB(board Board, depth int, maximizingPlayer bool, pruner AlphaBetaPruner) int {
-	if depth == 0 || isGameOver(board) {
-		return evaluateBoard(board)
+func evaluateWithAlphaBeta(node Board, depth int, alpha, beta int, maximizingPlayer bool) int {
+	if depth == 0 || isGameOver(node) {
+		return evaluateBoard(node)
 	}
 
 	if maximizingPlayer {
 		maxEval := math.MinInt64
 		for _, move := range []Move{Up, Down, Left, Right} {
-			if isValidMove(board, move) {
-				newBoard := makeMove(board, move)
-				eval := minimaxAB(newBoard, depth-1, false, pruner)
+			if isValidMove(node, move) {
+				newBoard := makeMove(node, move)
+				eval := evaluateWithAlphaBeta(newBoard, depth-1, alpha, beta, true)
 				maxEval = max(maxEval, eval)
 
-				pruner.update(eval, true)
-				if pruner.alpha >= pruner.beta {
+				alpha = max(alpha, eval)
+				if beta <= alpha {
 					break
 				}
 			}
@@ -49,46 +37,19 @@ func minimaxAB(board Board, depth int, maximizingPlayer bool, pruner AlphaBetaPr
 	} else {
 		minEval := math.MaxInt64
 		for _, move := range []Move{Up, Down, Left, Right} {
-			if isValidMove(board, move) {
-				newBoard := makeMove(board, move)
-				eval := minimaxAB(newBoard, depth-1, true, pruner)
+			if isValidMove(node, move) {
+				newBoard := makeMove(node, move)
+				eval := evaluateWithAlphaBeta(newBoard, depth-1, alpha, beta, false)
 				minEval = min(minEval, eval)
 
-				// Alpha-beta pruning:
-				pruner.update(eval, false)
-				if pruner.alpha >= pruner.beta {
-					break // Prune remaining branches if beta <= alpha
+				beta = min(beta, eval)
+				if beta <= alpha {
+					break
 				}
 			}
 		}
 		return minEval
 	}
-}
-
-func getBestMoveDynamicDepth(board Board) Move {
-	dynamicDepth := 5
-	if isCloseTo2048(board) {
-		dynamicDepth = 9
-	}
-
-	bestMove := Up
-	bestScore := math.MinInt64
-
-	pruner := AlphaBetaPruner{alpha: math.MinInt64, beta: math.MaxInt64}
-
-	for _, move := range []Move{Up, Down, Left, Right} {
-		if isValidMove(board, move) {
-			newBoard := makeMove(board, move)
-			score := minimaxAB(newBoard, dynamicDepth, false, pruner) // Změna: nepotřebujeme snižovat hloubku o 1
-
-			if score > bestScore {
-				bestScore = score
-				bestMove = move
-			}
-		}
-	}
-
-	return bestMove
 }
 
 func isCloseTo2048(board Board) bool {
@@ -102,39 +63,56 @@ func isCloseTo2048(board Board) bool {
 	return false
 }
 
+func getBestMoveDynamicDepth(board Board) Move {
+	dynamicDepth := 6
+	if isCloseTo2048(board) {
+		dynamicDepth = 8
+	}
+
+	bestMove := Up
+	bestScore := math.MinInt64
+
+	for _, move := range []Move{Up, Down, Left, Right} {
+		if isValidMove(board, move) {
+			newBoard := makeMove(board, move)
+			score := evaluateWithAlphaBeta(newBoard, dynamicDepth, math.MinInt64, math.MaxInt64, true)
+
+			if score > bestScore {
+				bestScore = score
+				bestMove = move
+			}
+		}
+	}
+
+	return bestMove
+}
+
 func evaluateBoard(board [Size][Size]int) int {
-	score := 0
-	maxTile := 0
-	emptyTiles := 0
+	sumOfBoard := 0
+	nonEmptyTiles := 0
+	mergedTilesSum := 0
 
 	for i := 0; i < Size; i++ {
 		for j := 0; j < Size; j++ {
 			value := board[i][j]
 
-			score += value
+			// Sum of all numbers on the board
+			sumOfBoard += value
 
-			if value > maxTile {
-				maxTile = value
-			}
-
-			// Bonus za prázdná políčka s vysokou hodnotou
-			if value == 0 {
-				emptyTiles++
-			}
-
-			// Bonus za sloučení dlaždic
+			// Sum of merged tiles
 			if j < Size-1 && board[i][j] == board[i][j+1] {
-				score += 4
+				mergedTilesSum += 2 * value
 			}
+
+			// Number of non-empty tiles
+			if board[i][j] != 0 {
+				nonEmptyTiles++
+			}
+
 		}
 	}
 
-	// Bonus za blízkost k hodnotě 2048
-	distanceTo2048 := math.Abs(float64(maxTile - 2048))
-	score += int(10 / distanceTo2048)
+	utility := (mergedTilesSum + sumOfBoard) / nonEmptyTiles
 
-	// Bonus za prázdná políčka s vysokou hodnotou
-	score += emptyTiles * 2
-
-	return score
+	return utility
 }
