@@ -1,38 +1,33 @@
 package main
 
 import (
+	"Solver2048/solver"
+	"context"
 	"fmt"
-)
-
-const (
-	MaxRounds = 30
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
-	wins, losses := 0, 0
+	start := time.Now()
 
-	for round := 1; round <= MaxRounds; round++ {
-		fmt.Printf("Round %d\n", round)
+	ctx, cancel := context.WithCancel(context.Background())
 
-		board := initializeBoard()
-		printBoard(board)
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 
-		for !isGameOver(board) {
-			move := getBestMoveDynamicDepth(board)
+	go func() {
+		<-sigCh
+		fmt.Println("Received interrupt signal. Cleaning up...")
+		cancel()
+	}()
 
-			fmt.Println("Move:", moveNames[move])
-			board = makeMove(board, move)
-			printBoard(board)
-		}
+	wins, losses := solver.Minimax(ctx)
 
-		if hasMaxTile(board) {
-			fmt.Println("You win!")
-			wins++
-		} else {
-			fmt.Println("Game over. You lose.")
-			losses++
-		}
+	fmt.Printf("Wins: %d, Losses: %d\n", wins, losses)
 
-		fmt.Printf("Wins: %d, Losses: %d\n", wins, losses)
-	}
+	elapsed := time.Since(start)
+	fmt.Println("Finished in:", elapsed)
 }

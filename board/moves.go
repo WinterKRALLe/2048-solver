@@ -1,22 +1,6 @@
-package main
+package board
 
-type Move int
-
-const (
-	Up Move = iota
-	Down
-	Left
-	Right
-)
-
-var moveNames = map[Move]string{
-	Up:    "Up",
-	Down:  "Down",
-	Left:  "Left",
-	Right: "Right",
-}
-
-func isValidMove(board Board, move Move) bool {
+func IsValidMove(board Board, move Move) bool {
 	switch move {
 	case Up:
 		for col := 0; col < Size; col++ {
@@ -55,8 +39,8 @@ func isValidMove(board Board, move Move) bool {
 	return false
 }
 
-func makeMove(board Board, move Move) Board {
-	newBoard := copyBoard(board)
+func MakeMove(board Board, move Move) Board {
+	newBoard := CopyBoard(board)
 
 	switch move {
 	case Up:
@@ -161,16 +145,6 @@ func makeMove(board Board, move Move) Board {
 	return newBoard
 }
 
-func copyBoard(board Board) Board {
-	var newBoard Board
-	for i, row := range board {
-		for j, value := range row {
-			newBoard[i][j] = value
-		}
-	}
-	return newBoard
-}
-
-func isGameOver(board Board) bool {
-	return !isValidMove(board, Up) && !isValidMove(board, Down) && !isValidMove(board, Left) && !isValidMove(board, Right)
+func IsGameOver(board Board) bool {
+	return !IsValidMove(board, Up) && !IsValidMove(board, Down) && !IsValidMove(board, Left) && !IsValidMove(board, Right)
 }

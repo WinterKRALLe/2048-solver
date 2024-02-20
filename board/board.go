@@ -1,17 +1,11 @@
-package main
+package board
 
 import (
 	"fmt"
 	"math/rand"
 )
 
-const (
-	Size = 4
-)
-
-type Board [Size][Size]int
-
-func initializeBoard() Board {
+func InitializeBoard() Board {
 	board := Board{}
 
 	for i := 0; i < 2; i++ {
@@ -21,11 +15,21 @@ func initializeBoard() Board {
 	return board
 }
 
-func printBoard(board Board) {
+func PrintBoard(board Board) {
 	for _, row := range board {
 		fmt.Println(row)
 	}
 	fmt.Println()
+}
+
+func CopyBoard(board Board) Board {
+	var newBoard Board
+	for i, row := range board {
+		for j, value := range row {
+			newBoard[i][j] = value
+		}
+	}
+	return newBoard
 }
 
 func placeRandomTile(board *Board) {
