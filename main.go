@@ -20,7 +20,6 @@ func main() {
 
 	go func() {
 		<-sigCh
-		fmt.Println("Received interrupt signal. Cleaning up...")
 		cancel()
 	}()
 
