@@ -21,3 +21,16 @@ const (
 	Size      = 4
 	MaxRounds = 30
 )
+
+type Game2048 struct {
+	Board Board
+	Score int
+}
+
+type Node struct {
+	Game       *Game2048
+	Move       string
+	ChildNodes []*Node
+	Wins       int
+	Visits     int
+}

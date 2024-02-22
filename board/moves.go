@@ -12,7 +12,7 @@ func IsValidMove(board Board, move Move) bool {
 		}
 	case Down:
 		for col := 0; col < Size; col++ {
-			for row := Size - 2; row >= 0; row-- {
+			for row := 0; row < Size-1; row++ {
 				if board[row][col] != 0 && (board[row+1][col] == 0 || board[row+1][col] == board[row][col]) {
 					return true
 				}
@@ -28,7 +28,7 @@ func IsValidMove(board Board, move Move) bool {
 		}
 	case Right:
 		for row := 0; row < Size; row++ {
-			for col := Size - 2; col >= 0; col-- {
+			for col := 0; col < Size-1; col++ {
 				if board[row][col] != 0 && (board[row][col+1] == 0 || board[row][col+1] == board[row][col]) {
 					return true
 				}

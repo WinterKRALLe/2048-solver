@@ -56,7 +56,7 @@ func isCloseTo2048(board b.Board) bool {
 	return false
 }
 
-func GetBestMoveDynamicDepth(board b.Board) b.Move {
+func getBestMoveDynamicDepth(board b.Board) b.Move {
 	dynamicDepth := 6
 	if isCloseTo2048(board) {
 		dynamicDepth = 8
@@ -142,7 +142,7 @@ func Minimax(ctx context.Context) (int, int) {
 
 func playRound(board b.Board) string {
 	for !b.IsGameOver(board) {
-		move := GetBestMoveDynamicDepth(board)
+		move := getBestMoveDynamicDepth(board)
 
 		fmt.Println("Move:", b.MoveNames[move])
 		board = b.MakeMove(board, move)
