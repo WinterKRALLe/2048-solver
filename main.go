@@ -27,6 +27,8 @@ func main() {
 
 	wins, losses := solver.MonteCarlo(ctx)
 
+	//wins, losses := solver.PureRandom(ctx)
+
 	fmt.Printf("Wins: %d, Losses: %d\n", wins, losses)
 
 	elapsed := time.Since(start)

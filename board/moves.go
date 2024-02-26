@@ -1,5 +1,7 @@
 package board
 
+import "math/rand"
+
 func IsValidMove(board Board, move Move) bool {
 	switch move {
 	case Up:
@@ -147,4 +149,18 @@ func MakeMove(board Board, move Move) Board {
 
 func IsGameOver(board Board) bool {
 	return !IsValidMove(board, Up) && !IsValidMove(board, Down) && !IsValidMove(board, Left) && !IsValidMove(board, Right)
+}
+
+func GetRandomValidMove(board Board) Move {
+	for {
+		move := GetRandomMove()
+		if IsValidMove(board, move) {
+			return move
+		}
+	}
+}
+
+func GetRandomMove() Move {
+	moves := []Move{Up, Down, Left, Right}
+	return moves[rand.Intn(len(moves))]
 }

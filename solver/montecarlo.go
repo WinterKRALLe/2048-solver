@@ -4,7 +4,6 @@ import (
 	b "Solver2048/board"
 	"context"
 	"fmt"
-	"math/rand"
 )
 
 func runMonteCarloSimulation(initialBoard b.Board, move b.Move) int {
@@ -17,7 +16,7 @@ func runMonteCarloSimulation(initialBoard b.Board, move b.Move) int {
 		simulatedBoard = b.MakeMove(simulatedBoard, move)
 
 		for !b.IsGameOver(simulatedBoard) {
-			randomMove := getRandomMove()
+			randomMove := b.GetRandomValidMove(simulatedBoard)
 			simulatedBoard = b.MakeMove(simulatedBoard, randomMove)
 		}
 
@@ -35,11 +34,6 @@ func calculateScore(boardState b.Board) int {
 		}
 	}
 	return totalScore
-}
-
-func getRandomMove() b.Move {
-	moves := []b.Move{b.Up, b.Down, b.Left, b.Right}
-	return moves[rand.Intn(len(moves))]
 }
 
 func selectBestMove(currentBoard b.Board) b.Move {
