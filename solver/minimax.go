@@ -112,23 +112,38 @@ func evaluateBoard(board b.Board) int {
 	return utility
 }
 
-func Minimax(ctx context.Context) (int, int) {
+func Minimax(ctx context.Context) (int, int, map[string]int, int, int, map[int]int) {
 	wins, losses := 0, 0
+	totalMoveCounts := make(map[string]int)
+	newBestScore, newLowestScore := 0, 0
+	maxTileCounts := make(map[int]int)
 
 	for round := 1; round <= b.MaxRounds; round++ {
 		fmt.Printf("Round %d\n", round)
 
 		board := b.InitializeBoard()
-		b.PrintBoard(board)
 
 		select {
 		case <-ctx.Done():
 			fmt.Println("\nReceived interrupt signal. Cleaning up...")
-			return wins, losses
+			return wins, losses, totalMoveCounts, newBestScore, newLowestScore, maxTileCounts
 		default:
 		}
 
-		result := playRound(board)
+		result, moveCount, score, maxTile := playRound(board)
+		for move, count := range moveCount {
+			totalMoveCounts[move] += count
+		}
+
+		if score > newBestScore {
+			newBestScore = score
+		}
+
+		if score < newLowestScore || score < newBestScore {
+			newLowestScore = score
+		}
+
+		maxTileCounts[maxTile]++
 
 		if result == "win" {
 			wins++
@@ -137,21 +152,34 @@ func Minimax(ctx context.Context) (int, int) {
 		}
 	}
 
-	return wins, losses
+	return wins, losses, totalMoveCounts, newBestScore, newLowestScore, maxTileCounts
 }
 
-func playRound(board b.Board) string {
+func playRound(board b.Board) (string, map[string]int, int, int) {
+	score, maxTile := 0, 0
+	moveCounts := make(map[string]int)
+
 	for !b.IsGameOver(board) {
 		move := getBestMoveDynamicDepth(board)
 
-		fmt.Println("Move:", b.MoveNames[move])
+		moveCounts[b.MoveNames[move]]++
+
+		for _, row := range board {
+			for _, value := range row {
+				if value > maxTile {
+					maxTile = value
+				}
+			}
+		}
+
+		score = b.CalculateScore(board)
+
 		board = b.MakeMove(board, move)
-		b.PrintBoard(board)
 	}
 
 	if b.HasMaxTile(board) {
-		return "win"
+		return "win", moveCounts, score, 2048
 	}
 
-	return "lose"
+	return "lose", moveCounts, score, maxTile
 }

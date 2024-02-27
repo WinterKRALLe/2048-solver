@@ -23,22 +23,55 @@ func main() {
 		cancel()
 	}()
 
-	//wins, losses := solver.Minimax(ctx)
+	minimaxWins, minimaxLosses, minimaxMoveCounts, minimaxTotalBestScore, minimaxTotalLowestScore, minimaxMaxTileCounts := solver.Minimax(ctx)
+	monteCarloWins, monteCarloLosses, monteCarloMoveCounts, monteCarloTotalBestScore, monteCarloTotalLowestScore, monteCarloMaxTileCounts := solver.MonteCarlo(ctx)
+	pureRandomWins, pureRandomLosses, pureRandomMoveCounts, pureRandomTotalBestScore, pureRandomTotalLowestScore, pureRandomMaxTileCounts := solver.PureRandom(ctx)
 
-	//wins, losses, moveCounts, totalBestScore, totalLowestScore, maxTileCounts := solver.MonteCarlo(ctx)
-	wins, losses, moveCounts, totalBestScore, totalLowestScore, maxTileCounts := solver.PureRandom(ctx)
+	fmt.Println("\n########## MINIMAX ##########")
 
-	fmt.Printf("Wins: %d, Losses: %d\n", wins, losses)
-	fmt.Printf("\nBest Score: %.2f\n", float64(totalBestScore)/float64(wins+losses))
-	fmt.Printf("Lowest Score: %.2f\n", float64(totalLowestScore)/float64(wins+losses))
+	fmt.Printf("Wins: %d, Losses: %d\n", minimaxWins, minimaxLosses)
+	fmt.Printf("\nBest Score: %.2f\n", float64(minimaxTotalBestScore)/float64(minimaxWins+minimaxLosses))
+	fmt.Printf("Lowest Score: %.2f\n", float64(minimaxTotalLowestScore)/float64(minimaxWins+minimaxLosses))
 
 	fmt.Println("\nMove Counts:")
-	for move, count := range moveCounts {
+	for move, count := range minimaxMoveCounts {
 		fmt.Printf("%s: %dx\n", move, count)
 	}
 
 	fmt.Println("\nMax Tile Counts:")
-	for maxTile, count := range maxTileCounts {
+	for maxTile, count := range minimaxMaxTileCounts {
+		fmt.Printf("%d: %dx\n", maxTile, count)
+	}
+
+	fmt.Println("\n########## MONTE CARLO ##########")
+
+	fmt.Printf("\nWins: %d, Losses: %d\n", monteCarloWins, monteCarloLosses)
+	fmt.Printf("\nBest Score: %.2f\n", float64(monteCarloTotalBestScore)/float64(monteCarloWins+monteCarloLosses))
+	fmt.Printf("Lowest Score: %.2f\n", float64(monteCarloTotalLowestScore)/float64(monteCarloWins+monteCarloLosses))
+
+	fmt.Println("\nMove Counts:")
+	for move, count := range monteCarloMoveCounts {
+		fmt.Printf("%s: %dx\n", move, count)
+	}
+
+	fmt.Println("\nMax Tile Counts:")
+	for maxTile, count := range monteCarloMaxTileCounts {
+		fmt.Printf("%d: %dx\n", maxTile, count)
+	}
+
+	fmt.Println("\n########## PURE RANDOM ##########")
+
+	fmt.Printf("\nWins: %d, Losses: %d\n", pureRandomWins, pureRandomLosses)
+	fmt.Printf("\nBest Score: %.2f\n", float64(pureRandomTotalBestScore)/float64(pureRandomWins+pureRandomLosses))
+	fmt.Printf("Lowest Score: %.2f\n", float64(pureRandomTotalLowestScore)/float64(pureRandomWins+pureRandomLosses))
+
+	fmt.Println("\nMove Counts:")
+	for move, count := range pureRandomMoveCounts {
+		fmt.Printf("%s: %dx\n", move, count)
+	}
+
+	fmt.Println("\nMax Tile Counts:")
+	for maxTile, count := range pureRandomMaxTileCounts {
 		fmt.Printf("%d: %dx\n", maxTile, count)
 	}
 
