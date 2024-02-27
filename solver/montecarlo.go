@@ -36,9 +36,10 @@ func calculateScore(boardState b.Board) int {
 	return totalScore
 }
 
-func selectBestMove(currentBoard b.Board) b.Move {
+func selectBestMove(currentBoard b.Board) (b.Move, int, int) {
 	bestMove := b.Up
 	bestScore := runMonteCarloSimulation(currentBoard, bestMove)
+	lowestScore := runMonteCarloSimulation(currentBoard, bestMove)
 
 	moves := []b.Move{b.Down, b.Left, b.Right}
 
@@ -48,15 +49,20 @@ func selectBestMove(currentBoard b.Board) b.Move {
 			if score > bestScore {
 				bestScore = score
 				bestMove = move
+			} else if score < lowestScore {
+				lowestScore = score
 			}
 		}
 	}
 
-	return bestMove
+	return bestMove, bestScore, lowestScore
 }
 
-func MonteCarlo(ctx context.Context) (int, int) {
+func MonteCarlo(ctx context.Context) (int, int, map[string]int, int, int, map[int]int) {
 	wins, losses := 0, 0
+	totalMoveCounts := make(map[string]int)
+	newBestScore, newLowestScore := 0, 0
+	maxTileCounts := make(map[int]int)
 
 	for round := 1; round <= b.MaxRounds; round++ {
 		fmt.Printf("Round %d\n", round)
@@ -67,37 +73,63 @@ func MonteCarlo(ctx context.Context) (int, int) {
 		select {
 		case <-ctx.Done():
 			fmt.Println("\nReceived interrupt signal. Cleaning up...")
-			return wins, losses
+			return wins, losses, totalMoveCounts, newBestScore, newLowestScore, maxTileCounts
 		default:
 		}
 
-		result := playMonteCarloRound(board)
+		result, moveCount, bestScore, lowestScore, maxTile := playMonteCarloRound(board)
+
+		for move, count := range moveCount {
+			totalMoveCounts[move] += count
+		}
+
+		if bestScore > newBestScore {
+			newBestScore = bestScore
+		}
+		if lowestScore > newLowestScore {
+			newLowestScore = lowestScore
+		}
 
 		if result == "win" {
 			wins++
+			maxTileCounts[maxTile]++
+
 		} else {
 			losses++
+			maxTileCounts[maxTile]++
+
 		}
+
 	}
 
-	return wins, losses
+	return wins, losses, totalMoveCounts, newBestScore, newLowestScore, maxTileCounts
 }
 
-func playMonteCarloRound(board b.Board) string {
+func playMonteCarloRound(board b.Board) (string, map[string]int, int, int, int) {
+	bestScore, lowestScore, maxTile := 0, 0, 0
+	moveCounts := make(map[string]int)
+
 	for !b.IsGameOver(board) {
-		move := selectBestMove(board)
-		//fmt.Println("Move:", b.MoveNames[b.Up], "Average Score:", runMonteCarloSimulation(board, b.Up))
-		//fmt.Println("Move:", b.MoveNames[b.Down], "Average Score:", runMonteCarloSimulation(board, b.Down))
-		//fmt.Println("Move:", b.MoveNames[b.Left], "Average Score:", runMonteCarloSimulation(board, b.Left))
-		//fmt.Println("Move:", b.MoveNames[b.Right], "Average Score:", runMonteCarloSimulation(board, b.Right))
-		//fmt.Println("Selected Move:", b.MoveNames[move])
-		board = b.MakeMove(board, move)
-		//b.PrintBoard(board)
+		moveRes, bestScoreRes, lowestScoreRes := selectBestMove(board)
+
+		bestScore = bestScore + bestScoreRes
+		lowestScore = lowestScore + lowestScoreRes
+		moveCounts[b.MoveNames[moveRes]]++
+
+		for _, row := range board {
+			for _, value := range row {
+				if value > maxTile {
+					maxTile = value
+				}
+			}
+		}
+
+		board = b.MakeMove(board, moveRes)
 
 		if b.HasMaxTile(board) {
-			return "win"
+			return "win", moveCounts, bestScore, lowestScore, 2048
 		}
 	}
+	return "lose", moveCounts, bestScore, lowestScore, maxTile
 
-	return "lose"
 }
