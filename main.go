@@ -25,8 +25,8 @@ func main() {
 
 	//wins, losses := solver.Minimax(ctx)
 
-	wins, losses, moveCounts, totalBestScore, totalLowestScore, maxTileCounts := solver.MonteCarlo(ctx)
-	//wins, losses := solver.PureRandom(ctx)
+	//wins, losses, moveCounts, totalBestScore, totalLowestScore, maxTileCounts := solver.MonteCarlo(ctx)
+	wins, losses, moveCounts, totalBestScore, totalLowestScore, maxTileCounts := solver.PureRandom(ctx)
 
 	fmt.Printf("Wins: %d, Losses: %d\n", wins, losses)
 	fmt.Printf("\nBest Score: %.2f\n", float64(totalBestScore)/float64(wins+losses))

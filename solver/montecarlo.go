@@ -20,20 +20,10 @@ func runMonteCarloSimulation(initialBoard b.Board, move b.Move) int {
 			simulatedBoard = b.MakeMove(simulatedBoard, randomMove)
 		}
 
-		totalScore += calculateScore(simulatedBoard)
+		totalScore += b.CalculateScore(simulatedBoard)
 	}
 
 	return totalScore / numSimulations
-}
-
-func calculateScore(boardState b.Board) int {
-	totalScore := 0
-	for _, row := range boardState {
-		for _, value := range row {
-			totalScore += value
-		}
-	}
-	return totalScore
 }
 
 func selectBestMove(currentBoard b.Board) (b.Move, int, int) {

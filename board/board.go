@@ -67,3 +67,13 @@ func HasMaxTile(board Board) bool {
 	}
 	return maxTile >= 2048
 }
+
+func CalculateScore(boardState Board) int {
+	totalScore := 0
+	for _, row := range boardState {
+		for _, value := range row {
+			totalScore += value
+		}
+	}
+	return totalScore
+}
